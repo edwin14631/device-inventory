@@ -1,0 +1,82 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Reports - SureFlow{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ total_employees }}</h3>
+                <p class="text-muted mb-0">Total Employees</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-laptop text-success" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ total_devices }}</h3>
+                <p class="text-muted mb-0">Total Devices</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-percent text-warning" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">
+                    {% widthratio assigned_devices total_devices 100 %}%
+                </h3>
+                <p class="text-muted mb-0">Utilization Rate</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-calculator text-info" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ avg_devices_per_employee }}</h3>
+                <p class="text-muted mb-0">Avg Devices/Employee</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Generation -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>Generate Reports
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="report-item">
+                    <h6>Device Inventory Report</h6>
+                    <p class="text-muted">Complete list of all devices with assignment status</p>
+                    <a href="{% url 'inventory:export_report' %}?type=devices" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-download me-2"></i>Download CSV
+                    </a>
+                </div>
+
+                <hr>
+
+                <div class="report-item">
+                    <h6>Employee Device Report</h6>
+                    <p class="text-muted">List of devices assigned to each employee</p>
+                    <a href="{% url 'inventory:export_report' %}?type=employees" 
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-download me-2"></i>Download CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

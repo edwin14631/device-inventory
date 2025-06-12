@@ -1,0 +1,61 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Positions - SureFlow{% endblock %}
+{% block page_title %}Position Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Positions</h4>
+            <a href="{% url 'inventory:position_add' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add Position
+            </a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Position Title</th>
+                        <th>Description</th>
+                        <th>Employee Count</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for position in positions %}
+                    <tr>
+                        <td>{{ position.name }}</td>
+                        <td>{{ position.description|truncatewords:10 }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ position.employee_count }}</span>
+                        </td>
+                        <td>
+                            {% if position.status == 1 %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'inventory:position_edit' position.pk %}" class="btn btn-sm btn-outline-primary" title="Edit Position">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'inventory:position_delete' position.pk %}" class="btn btn-sm btn-outline-danger" title="Delete Position">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">No positions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

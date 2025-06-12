@@ -1,0 +1,134 @@
+
+
+{% extends 'inventory/base.html' %}
+
+{% block title %}Device Details - SureFlow{% endblock %}
+{% block page_title %}Device Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">{{ device.device_type.name }}</h4>
+                <p class="text-muted mb-0">{{ device.serial_number }}</p>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Brand:</dt>
+                    <dd class="col-sm-8">{{ device.brand|default:"Not specified" }}</dd>
+                    
+                    <dt class="col-sm-4">Model:</dt>
+                    <dd class="col-sm-8">{{ device.model|default:"Not specified" }}</dd>
+                    
+                    <dt class="col-sm-4">Type:</dt>
+                    <dd class="col-sm-8">{{ device.device_type.name }}</dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        {% if device.status == 'available' %}
+                            <span class="badge bg-success">Available</span>
+                        {% elif device.status == 'assigned' %}
+                            <span class="badge bg-primary">Assigned</span>
+                        {% elif device.status == 'maintenance' %}
+                            <span class="badge bg-warning">Under Maintenance</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Retired</span>
+                        {% endif %}
+                    </dd>
+                    
+                    {% if device.assigned_to %}
+                    <dt class="col-sm-4">Assigned To:</dt>
+                    <dd class="col-sm-8">
+                        <a href="{% url 'inventory:employee_detail' device.assigned_to.pk %}">
+                            {{ device.assigned_to.full_name }}
+                        </a>
+                        <br>
+                        <small class="text-muted">Employee Code: {{ device.assigned_to.code }}</small>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Date Assigned:</dt>
+                    <dd class="col-sm-8">{{ device.date_assigned|date:"M d, Y" }}</dd>
+                    {% endif %}
+                    
+                    <dt class="col-sm-4">Remarks:</dt>
+                    <dd class="col-sm-8">{{ device.remark|default:"No remarks" }}</dd>
+                    
+                    <dt class="col-sm-4">Date Added:</dt>
+                    <dd class="col-sm-8">{{ device.date_added|date:"M d, Y H:i" }}</dd>
+                    
+                    <dt class="col-sm-4">Last Updated:</dt>
+                    <dd class="col-sm-8">{{ device.date_updated|date:"M d, Y H:i" }}</dd>
+                </dl>
+                
+                <div class="mt-4">
+                    <a href="{% url 'inventory:device_edit' device.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                    </a>
+                    {% if device.status == 'available' %}
+                        <a href="{% url 'inventory:device_assign' device.pk %}" class="btn btn-success">
+                            <i class="bi bi-person-plus me-2"></i>Assign
+                        </a>
+                    {% elif device.status == 'assigned' %}
+                        <a href="{% url 'inventory:device_return' device.pk %}" class="btn btn-warning">
+                            <i class="bi bi-arrow-return-left me-2"></i>Return
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'inventory:device_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                    <a href="{% url 'inventory:device_delete' device.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Assignment History</h5>
+            </div>
+            <div class="card-body">
+                {% if assignment_history %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Assigned</th>
+                                    <th>Returned</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for history in assignment_history %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:employee_detail' history.employee.pk %}">
+                                            {{ history.employee.full_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ history.assigned_date|date:"M d, Y" }}</td>
+                                    <td>{{ history.returned_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>
+                                        {% if history.returned_date %}
+                                            <span class="badge bg-secondary">Returned</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No assignment history available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

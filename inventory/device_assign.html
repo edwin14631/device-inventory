@@ -1,0 +1,40 @@
+{% extends 'inventory/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Assign Device - SureFlow{% endblock %}
+{% block page_title %}Assign Device{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5 class="alert-heading">Device Information</h5>
+                    <p class="mb-1"><strong>Device:</strong> {{ device.device_type.name }}</p>
+                    <p class="mb-1"><strong>Serial Number:</strong> {{ device.serial_number }}</p>
+                    {% if device.brand or device.model %}
+                        <p class="mb-0"><strong>Model:</strong> {{ device.brand }} {{ device.model }}</p>
+                    {% endif %}
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {{ form.employee|as_crispy_field }}
+                    {{ form.reason|as_crispy_field }}
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-2"></i>Assign Device
+                        </button>
+                        <a href="{% url 'inventory:device_detail' device.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

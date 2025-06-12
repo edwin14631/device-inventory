@@ -1,0 +1,90 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Employees - SureFlow{% endblock %}
+{% block page_title %}Employee Management{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Employee List</h4>
+            <a href="{% url 'inventory:employee_add' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus me-2"></i>Add Employee
+            </a>
+        </div>
+        
+        <!-- Search and Filter -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <input type="text" name="q" class="form-control" placeholder="Search by name, email, or employee code..." value="{{ request.GET.q }}">
+            </div>
+            <div class="col-md-3">
+                <select name="department" class="form-select">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if request.GET.department == dept.id|stringformat:"s" %}selected{% endif %}>
+                            {{ dept.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>Search
+                </button>
+                <a href="{% url 'inventory:employee_list' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+        
+        <!-- Employee Table -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Assigned Devices</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.code }}</td>
+                        <td>{{ employee.full_name }}</td>
+                        <td>{{ employee.email }}</td>
+                        <td>{{ employee.department.name }}</td>
+                        <td>{{ employee.position.name }}</td>
+                        <td>
+                            {% if employee.assigned_device_count > 0 %}
+                                <span class="badge bg-primary">{{ employee.assigned_device_count }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">0</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'inventory:employee_detail' employee.pk %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'inventory:employee_edit' employee.pk %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'inventory:employee_delete' employee.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No employees found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

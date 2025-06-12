@@ -1,0 +1,76 @@
+services:
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inventory_django_app
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    networks:
+      - inventory-app-network    
+
+  inventorydb:
+    image: postgres:latest
+    container_name: inventory_postgres_db
+    environment:
+      POSTGRES_DB: inventorydatabase
+      POSTGRES_USER: inventorypostgres
+      POSTGRES_PASSWORD: Kj8P9vL2nQ5
+    volumes:
+      - inventory-postgres-data:/var/lib/postgresql/data
+      - inventory-postgres-backups:/backups
+    ports:
+      - "5438:5432"
+    networks:
+      - inventory-app-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: inventory_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5054:80"
+    volumes:
+      - inventory-pgadmin-data:/var/lib/pgadmin
+    networks:
+      - inventory-app-network
+    depends_on:
+      - inventorydb    
+
+  backup:
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    container_name: inventory_postgres_backup
+    environment:
+      - POSTGRES_HOST=inventorydb
+      - POSTGRES_DB=inventorydatabase
+      - POSTGRES_USER=inventorypostgres
+      - POSTGRES_PASSWORD=Kj8P9vL2nQ5
+      - SCHEDULE= "0 1 * * *"
+    volumes:
+      - ./inventorybackups:/inventorybackups
+    depends_on:
+      - inventorydb
+    networks:
+      - inventory-app-network    
+
+volumes:
+  inventory-postgres-data:
+    driver: local
+  inventory-postgres-backups:
+    driver: local
+  inventory-pgadmin-data:
+    driver: local
+
+networks:
+  inventory-app-network:
+    driver: bridge

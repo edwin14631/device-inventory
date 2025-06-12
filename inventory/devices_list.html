@@ -1,0 +1,106 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Devices - SureFlow{% endblock %}
+{% block page_title %}Device Inventory{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Device List</h4>
+            <a href="{% url 'inventory:device_add' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add Device
+            </a>
+        </div>
+        
+        <!-- Search and Filter -->
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search by serial number, brand, or model..." value="{{ request.GET.q }}">
+            </div>
+            <div class="col-md-3">
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    {% for type in device_types %}
+                        <option value="{{ type.id }}" {% if request.GET.type == type.id|stringformat:"s" %}selected{% endif %}>
+                            {{ type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for status_code, status_name in statuses %}
+                        <option value="{{ status_code }}" {% if request.GET.status == status_code %}selected{% endif %}>
+                            {{ status_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{% url 'inventory:device_list' %}" class="btn btn-secondary">Clear</a>
+            </div>
+        </form>
+        
+        <!-- Device Cards Grid -->
+        <div class="row">
+            {% for device in devices %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">{{ device.device_type.name }}</h5>
+                            {% if device.status == 'available' %}
+                                <span class="badge bg-success">Available</span>
+                            {% elif device.status == 'assigned' %}
+                                <span class="badge bg-primary">Assigned</span>
+                            {% elif device.status == 'maintenance' %}
+                                <span class="badge bg-warning">Maintenance</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Retired</span>
+                            {% endif %}
+                        </div>
+                        
+                        <p class="text-muted mb-2">{{ device.serial_number }}</p>
+                        
+                        {% if device.brand or device.model %}
+                            <p class="mb-1"><strong>Model:</strong> {{ device.brand }} {{ device.model }}</p>
+                        {% endif %}
+                        
+                        {% if device.assigned_to %}
+                            <p class="mb-1"><strong>Assigned to:</strong> {{ device.assigned_to.full_name }}</p>
+                            <p class="mb-3"><small class="text-muted">Since {{ device.date_assigned|date:"M d, Y" }}</small></p>
+                        {% else %}
+                            <p class="mb-3 text-muted">Not assigned</p>
+                        {% endif %}
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'inventory:device_detail' device.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            {% if device.status == 'available' %}
+                                <a href="{% url 'inventory:device_assign' device.pk %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-person-plus"></i> Assign
+                                </a>
+                            {% elif device.status == 'assigned' %}
+                                <a href="{% url 'inventory:device_return' device.pk %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-arrow-return-left"></i> Return
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center text-muted">No devices found.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

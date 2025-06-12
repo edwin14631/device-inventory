@@ -1,0 +1,166 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}Dashboard - SureFlow{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Statistics Cards -->
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="number">{{ total_employees }}</div>
+            <div class="label text-muted">Total Employees</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="icon">
+                <i class="bi bi-laptop"></i>
+            </div>
+            <div class="number">{{ total_devices }}</div>
+            <div class="label text-muted">Total Devices</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="icon">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="number">{{ assigned_devices }}</div>
+            <div class="label text-muted">Assigned Devices</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="icon">
+                <i class="bi bi-box"></i>
+            </div>
+            <div class="number">{{ available_devices }}</div>
+            <div class="label text-muted">Available Devices</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <!-- Recent Assignments -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Recent Device Assignments
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Date Assigned</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in recent_assignments %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'inventory:device_detail' assignment.device.pk %}">
+                                        {{ assignment.device.serial_number }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'inventory:employee_detail' assignment.employee.pk %}">
+                                        {{ assignment.employee.full_name }}
+                                    </a>
+                                </td>
+                                <td>{{ assignment.employee.department.name }}</td>
+                                <td>{{ assignment.assigned_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'inventory:device_detail' assignment.device.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    No recent assignments
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Device Types Summary -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart me-2"></i>Device Types
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for device_type in device_types %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ device_type.name }}
+                        <span class="badge bg-primary rounded-pill">
+                            {{ device_type.device_count }}
+                        </span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-center text-muted">
+                        No device types found
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-auto">
+                        <a href="{% url 'inventory:employee_add' %}" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>Add Employee
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'inventory:device_add' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add Device
+                        </a>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{% url 'inventory:reports' %}" class="btn btn-outline-primary">
+                            <i class="bi bi-download me-2"></i>Generate Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

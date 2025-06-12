@@ -1,0 +1,73 @@
+{% extends 'inventory/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - SureFlow{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.serial_number %}
+                        <!-- Device Form Layout -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.serial_number|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {% if form.device_type_choice %}
+                                    {{ form.device_type_choice|as_crispy_field }}
+                                {% else %}
+                                    {{ form.device_type|as_crispy_field }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.brand|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.model|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        {{ form.remark|as_crispy_field }}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Save Device
+                            </button>
+                            <a href="{% url 'inventory:device_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Generic Form Layout for Departments, Positions, etc. -->
+                        {{ form|crispy }}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Save
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Cancel
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

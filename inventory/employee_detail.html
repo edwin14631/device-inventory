@@ -1,0 +1,161 @@
+{% extends 'inventory/base.html' %}
+
+{% block title %}{{ employee.full_name }} - SureFlow{% endblock %}
+{% block page_title %}Employee Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ employee.full_name }}</h5>
+                <p class="text-muted">{{ employee.code }}</p>
+                
+                <hr>
+                
+                <p><strong>Email:</strong><br>{{ employee.email }}</p>
+                <p><strong>Department:</strong><br>{{ employee.department.name }}</p>
+                <p><strong>Position:</strong><br>{{ employee.position.name }}</p>
+                <p><strong>Gender:</strong><br>{{ employee.get_gender_display|default:"Not specified" }}</p>
+                <p><strong>Address:</strong><br>{{ employee.address }}</p>
+                <p><strong>Status:</strong><br>
+                    {% if employee.status == 1 %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </p>
+                
+                <div class="mt-4">
+                    <a href="{% url 'inventory:employee_edit' employee.pk %}" class="btn btn-primary">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                    </a>
+                    <a href="{% url 'inventory:employee_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <!-- Currently Assigned Devices -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Currently Assigned Devices ({{ assigned_devices_count }})</h5>
+                {% if assigned_devices_count > 0 %}
+                    <span class="badge bg-primary">{{ assigned_devices_count }} Device{{ assigned_devices_count|pluralize }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if assigned_devices %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Serial Number</th>
+                                    <th>Type</th>
+                                    <th>Brand/Model</th>
+                                    <th>Date Assigned</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device in assigned_devices %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:device_detail' device.pk %}">
+                                            {{ device.serial_number }}
+                                        </a>
+                                    </td>
+                                    <td>{{ device.device_type.name }}</td>
+                                    <td>
+                                        {% if device.brand or device.model %}
+                                            {{ device.brand|default:"" }} {{ device.model|default:"" }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ device.date_assigned|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'inventory:device_detail' device.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'inventory:device_return' device.pk %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-arrow-return-left"></i> Return
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i><br>
+                        No devices currently assigned to this employee.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Device Assignment History -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Device Assignment History</h5>
+            </div>
+            <div class="card-body">
+                {% if device_history %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Device</th>
+                                    <th>Type</th>
+                                    <th>Assigned Date</th>
+                                    <th>Returned Date</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for history in device_history %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'inventory:device_detail' history.device.pk %}">
+                                            {{ history.device.serial_number }}
+                                        </a>
+                                    </td>
+                                    <td>{{ history.device.device_type.name }}</td>
+                                    <td>{{ history.assigned_date|date:"M d, Y" }}</td>
+                                    <td>{{ history.returned_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>
+                                        {% if history.returned_date %}
+                                            {{ history.returned_date|timesince:history.assigned_date }}
+                                        {% else %}
+                                            {{ history.assigned_date|timesince }} (ongoing)
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if history.returned_date %}
+                                            <span class="badge bg-secondary">Returned</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="bi bi-clock-history" style="font-size: 2rem;"></i><br>
+                        No device assignment history available.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
